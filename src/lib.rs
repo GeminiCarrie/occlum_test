@@ -1,14 +1,17 @@
+cfg_if::cfg_if! {
+    if #[cfg(feature = "app")]  {
+#[macro_use]
+extern crate log;
 extern crate futures;
 extern crate grpc;
 extern crate grpc_protobuf;
 extern crate protobuf;
-#[macro_use]
-extern crate log;
+pub const DEFAULT_SERVER_FILE: &'static str = "occlum_exec_server";
+pub const DEFAULT_CLIENT_FILE: &'static str = "occlum_client";
+pub const DEFAULT_SOCK_FILE: &'static str = "localhost:7878";
+pub const DEFAULT_SERVER_TIMER: u32 = 3;
 
 pub mod exec;
-
-extern crate env_logger;
-
 use exec::{
     ExecCommRequest, ExecCommResponse_ExecutionStatus, GetResultRequest,
     GetResultResponse_ExecutionStatus, HealthCheckRequest, HealthCheckResponse_ServingStatus,
@@ -17,15 +20,10 @@ use exec::{
 use futures::executor;
 use grpc::prelude::*;
 use grpc::ClientConf;
-pub const DEFAULT_SERVER_FILE: &'static str = "occlum_exec_server";
-pub const DEFAULT_CLIENT_FILE: &'static str = "occlum_client";
-pub const DEFAULT_SOCK_FILE: &'static str = "localhost:7878";
-pub const DEFAULT_SERVER_TIMER: u32 = 3;
 
 use protobuf::RepeatedField;
 use std::cmp;
 use std::env;
-
 use std::path::Path;
 use std::process;
 use std::process::{Command, Stdio};
@@ -219,17 +217,6 @@ pub fn run(args: Vec<&str>) -> Result<(), i32> {
     if args.len() < 2 {
         return Err(-1);
     }
-    // let env: Vec<String> = env::vars()
-    //     .into_iter()
-    //     .map(|(key, val)| format!("{}={}", key, val))
-    //     .collect();
-
-    // let mut sock_file = String::from(args[0]);
-    // let sock_file = str::replace(
-    //     sock_file.as_mut_str(),
-    //     DEFAULT_CLIENT_FILE,
-    //     DEFAULT_SOCK_FILE,
-    // );
 
     let client = OcclumExecClient::new_plain("127.0.0.1", 7878, ClientConf::new())
         .expect("failed to create UDS client");
@@ -248,11 +235,6 @@ pub fn run(args: Vec<&str>) -> Result<(), i32> {
             .unwrap()
             .to_str()
             .unwrap();
-        // let env: Vec<&str> = env.iter().map(|string| string.as_str()).collect();
-
-        // Create the signal handler
-        // let process_killed = Arc::new(Mutex::new(false));
-        // let process_killed_clone = Arc::clone(&process_killed);
 
         println!("cmd {:?},cmd_arg {:?}", cmd, cmd_args);
         let env = vec!["RUST_BACKTRACE=1", "LD_LIBRARY_PATH=/root/occlum_instance/build/lib", "OLDPWD=/root/procjet/occlum/occlum/occlum/build/bin", "SGX_SDK=/opt/intel/sgxsdk", "PWD=/root/occlum_instance", "HOME=/root", "TERM=xterm", "SHLVL=2", "PATH=/opt/occlum/toolchains/jvm/bin:/opt/occlum/toolchains/rust/bin:/opt/occlum/toolchains/golang/bin:/opt/occlum/build/bin:/usr/local/occlum/bin:/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/intel/sgxsdk/bin:/opt/intel/sgxsdk/bin/x64", "OCCLUM_RUST_VERSION=nightly-2020-04-07", "PKG_CONFIG_PATH=:/opt/intel/sgxsdk/pkgconfig", "_=/root/occlum_instance/build/bin/occlum_exec_client"];
@@ -283,4 +265,8 @@ pub fn run(args: Vec<&str>) -> Result<(), i32> {
     }
 
     Ok(())
+}
+} else if #[cfg(feature = "mesalock_sgx")] {
+
+}
 }

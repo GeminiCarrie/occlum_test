@@ -6,23 +6,17 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = ["mesalock_sgx"]
+app = ["grpc","grpc-protobuf","protobuf","futures","tempdir","log"]
+mesalock_sgx = []
+
 [dependencies]
-#grpc = {path = "../../../../third_party/extern/occlum-nosgx/grpc"}
-#grpc-protobuf = {path = "../../../../third_party/extern/occlum-nosgx/grpc-protobuf"}
-#protobuf        = {path = "../../../../third_party/extern/occlum-nosgx/protobuf"}
-#futures         =  {path = "../../../../third_party/extern/occlum-nosgx/futures"}
-#env_logger      = "0.7"
-#tempdir         = {path = "../../../../third_party/extern/occlum-nosgx/tempdir"}
-#timer           = {path = "../../../../third_party/extern/occlum-nosgx/timer"}
-#libc            = "0.2"
+cfg-if     = { version = "0.1.9" }
+grpc = {version = "0.7",optional = true}
+grpc-protobuf = {version = "0.7",optional = true}
+protobuf        ={version ="2.14",optional = true} 
+futures         = {version ="0.3",optional = true}
+tempdir         = {version ="0.3",optional = true}
+log             = {version ="0.4.8",optional = true}
 
-#log             = "0.4.8"
-
-grpc = {git = "https://github.com/stepancheg/grpc-rust.git",branch = "v0.7"}
-grpc-protobuf = {git = "https://github.com/stepancheg/grpc-rust.git",branch = "v0.7"}
-protobuf        = "2.14"
-futures         = "0.3"
-env_logger      = "0.7"
-tempdir         = "0.3"
-#libc            = "0.2"
-log             = "0.4.8"
